@@ -351,7 +351,55 @@ textarea::placeholder { color: var(--text-2); }
 }
 
 /* ─── Responsive ─── */
-@media (max-width: 600px) {
-  .controls-grid { grid-template-columns: 1fr; }
-  .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+
+/* ─── Responsive: Tablet grande / Desktop médio (769 → 1024px) ─── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .app-container { max-width: 700px; padding: 1.75rem 1.5rem; }
+  .header h1 { font-size: 2rem; }
+  .emotions-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
 }
+
+/* ─── Responsive: Tablet (481 → 768px) ─── */
+@media (min-width: 481px) and (max-width: 768px) {
+  body { align-items: flex-start; padding: 1.5rem 1rem; }
+  .app-container { max-width: 100%; padding: 1.25rem 1rem; }
+  .header h1 { font-size: 1.8rem; }
+  .header { flex-direction: row; align-items: center; gap: 0.75rem; }
+  .controls-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .emotions-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.55rem; }
+  .emotion-btn { padding: 0.5rem 0.3rem; font-size: 0.83rem; }
+  textarea { min-height: 120px; font-size: 1rem; }
+  .play-btn { width: 62px; height: 62px; }
+  .stop-btn { width: 44px; height: 44px; }
+}
+
+/* ─── Responsive: Mobile médio e grande (321 → 480px) ─── */
+@media (min-width: 321px) and (max-width: 480px) {
+  body { padding: 1rem 0.75rem; align-items: flex-start; }
+  .app-container { padding: 0; }
+  .header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .header h1 { font-size: 1.6rem; }
+  .header p { font-size: 0.85rem; }
+  .controls-grid { grid-template-columns: 1fr; gap: 0; }
+  .glass-panel { border-radius: 10px; padding: 1.1rem; margin-bottom: 1rem; }
+  .emotions-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .emotion-btn { padding: 0.45rem 0.25rem; font-size: 0.8rem; border-radius: 7px; }
+  textarea { min-height: 110px; font-size: 0.97rem; padding: 1rem; }
+  .play-btn { width: 58px; height: 58px; }
+  .stop-btn { width: 42px; height: 42px; }
+  .player-controls { margin-top: 1rem; gap: 1.2rem; }
+  .theme-toggle { font-size: 0.78rem; padding: 0.35rem 0.7rem; }
+}
+
+/* ─── Responsive: Mobile pequeno (≤ 320px) ─── */
+@media (max-width: 320px) {
+  body { padding: 0.75rem 0.5rem; }
+  .header h1 { font-size: 1.4rem; }
+  .controls-grid { grid-template-columns: 1fr; gap: 0; }
+  .emotions-grid { grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+  .emotion-btn { font-size: 0.75rem; padding: 0.4rem 0.2rem; }
+  textarea { font-size: 0.92rem; min-height: 95px; }
+  .play-btn { width: 54px; height: 54px; }
+  .stop-btn { width: 40px; height: 40px; }
+}
+

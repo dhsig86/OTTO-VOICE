@@ -1,13 +1,53 @@
 export const EMOTIONS = {
-  neutro: { label: 'Neutro', pitch: 1.0, rate: 1.0, color: '#e6edf3' },
-  alegria: { label: 'Alegria', pitch: 1.2, rate: 1.1, color: '#f1c40f' },
-  felicidade: { label: 'Felicidade', pitch: 1.3, rate: 1.15, color: '#2ecc71' },
-  tristeza: { label: 'Tristeza', pitch: 0.6, rate: 0.75, color: '#3498db' },
-  ansiedade: { label: 'Ansiedade', pitch: 1.1, rate: 1.3, color: '#9b59b6' },
-  duvida: { label: 'Dúvida', pitch: 1.3, rate: 0.9, color: '#e67e22' },
-  irritacao: { label: 'Irritação', pitch: 0.8, rate: 1.2, color: '#e74c3c' },
-  dor: { label: 'Dor', pitch: 0.7, rate: 0.7, color: '#c0392b' },
-  angustia: { label: 'Angústia', pitch: 0.9, rate: 0.8, color: '#34495e' }
+  neutro: {
+    label: 'Neutro',
+    pitch: 1.0, rate: 1.0, volume: 1.0,
+    color: '#a0b4b2'
+  },
+  alegria: {
+    label: 'Alegria',
+    pitch: 1.25, rate: 1.1, volume: 1.0,
+    color: '#f1c40f'
+  },
+  felicidade: {
+    label: 'Felicidade',
+    pitch: 1.3, rate: 1.12, volume: 1.0,
+    color: '#2ecc71'
+  },
+  tristeza: {
+    // Antes: pitch 0.6 / rate 0.75 — ficava mecânico demais
+    // Agora: valores mais suaves e naturais
+    label: 'Tristeza',
+    pitch: 0.82, rate: 0.85, volume: 0.85,
+    color: '#5dade2'
+  },
+  ansiedade: {
+    label: 'Ansiedade',
+    pitch: 1.1, rate: 1.35, volume: 0.95,
+    color: '#9b59b6'
+  },
+  duvida: {
+    label: 'Dúvida',
+    pitch: 1.2, rate: 0.92, volume: 1.0,
+    color: '#e67e22'
+  },
+  irritacao: {
+    label: 'Irritação',
+    pitch: 0.85, rate: 1.18, volume: 1.0,
+    color: '#e74c3c'
+  },
+  dor: {
+    label: 'Dor',
+    pitch: 0.78, rate: 0.78, volume: 0.9,
+    color: '#c0392b'
+  },
+  angustia: {
+    // Antes: pitch 0.9 / rate 0.8 com "..." entre cada palavra — fragmentava demais
+    // Agora: tom um pouco mais grave, lento mas fluente
+    label: 'Angústia',
+    pitch: 0.88, rate: 0.78, volume: 0.88,
+    color: '#7f8c8d'
+  }
 };
 
 export function useEmotionEngine() {
@@ -17,26 +57,41 @@ export function useEmotionEngine() {
 
   const getRandomEmotion = () => {
     const keys = Object.keys(EMOTIONS).filter(k => k !== 'neutro');
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    return randomKey;
+    return keys[Math.floor(Math.random() * keys.length)];
   };
 
-  // Pode-se aplicar transformações de texto no futuro, como adicionar pausas "..."
+  /**
+   * Modificadores de texto — usados para simular pausas orgânicas.
+   * ATENÇÃO: Evitar exagero (ex: "..." entre cada palavra fragmenta a fala).
+   * Usar apenas pontuação natural ao final ou em posições estratégicas.
+   */
   const applyTextModifiers = (text, emotionKey) => {
-    if (!text) return text;
-    
+    if (!text || !text.trim()) return text;
+
     switch (emotionKey) {
-      case 'ansiedade':
-        // Substituir algumas vírgulas por pausas curtas visuais antes de falar
-        // Na Web Speech, a vírgula já dá uma pausa
-        return text;
+      case 'tristeza':
+        // Adiciona vírgula após frases para dar respiro melancólico
+        return text.replace(/([.!?])\s*/g, '$1... ').trim();
+
       case 'angustia':
+        // Leve pausa entre sentenças, sem fragmentar palavras
+        return text.replace(/([.!?])\s*/g, '$1, ').trim();
+
       case 'dor':
-        // Adiciona "..." ou vírgulas extras para forçar a engine a falar mais pausado
-        return text.split(' ').join('... '); 
+        // Pausa após sentenças (voz exausta)
+        return text.replace(/([.!?])\s*/g, '$1... ').trim();
+
       case 'duvida':
-        if (!text.endsWith('?')) return text + '?';
+        // Sobe ao final da frase como uma interrogação
+        if (!text.trim().endsWith('?') && !text.trim().endsWith('...')) {
+          return text.trim() + '?';
+        }
         return text;
+
+      case 'ansiedade':
+        // Sem modificações de texto — a velocidade já transmite a sensação
+        return text;
+
       default:
         return text;
     }

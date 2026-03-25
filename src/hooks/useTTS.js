@@ -53,7 +53,7 @@ export function useTTS() {
     }
   }, [loadVoices]);
 
-  const speak = (text, voiceObj, pitch = 1, rate = 1) => {
+  const speak = (text, voiceObj, pitch = 1, rate = 1, volume = 1) => {
     if (!window.speechSynthesis) {
       alert("Seu navegador não suporta síntese de voz.");
       return;
@@ -71,6 +71,7 @@ export function useTTS() {
     
     utterance.pitch = pitch;
     utterance.rate = rate;
+    utterance.volume = volume;
 
     utterance.onstart = () => { setIsPlaying(true); setIsPaused(false); };
     utterance.onend = () => { setIsPlaying(false); setIsPaused(false); };

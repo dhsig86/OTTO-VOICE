@@ -47,7 +47,7 @@ export default function App() {
       if (!text.trim()) return;
       const emotionValues = getEmotionSettings(selectedEmotion);
       const modifiedText = applyTextModifiers(text, selectedEmotion);
-      speak(modifiedText, selectedVoiceObj, emotionValues.pitch, emotionValues.rate);
+      speak(modifiedText, selectedVoiceObj, emotionValues.pitch, emotionValues.rate, emotionValues.volume);
     }
   };
 
