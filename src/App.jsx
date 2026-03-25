@@ -18,19 +18,29 @@ export default function App() {
 
   // Carrega configurações salvas
   const [savedSettings, setSavedSettings] = useState(() => settingsStore.load());
-  const [isDark, setIsDark] = useState(false); // Default: Light Mode
-  const [showSetup, setShowSetup] = useState(() => !settingsStore.load().setupDone);
+  const [isDark, setIsDark] = useState(savedSettings.isDark ?? false);
+  const [showSetup, setShowSetup] = useState(() => !savedSettings.setupDone);
   
   // Estado Modo Automático / Roleta
-  const [selectedEmotion, setSelectedEmotion] = useState('neutro');
-  const [intensity, setIntensity] = useState(() => settingsStore.load().intensity || 'moderada');
+  const [selectedEmotion, setSelectedEmotion] = useState(savedSettings.selectedEmotion || 'neutro');
+  const [intensity, setIntensity] = useState(savedSettings.intensity || 'moderada');
   const [text, setText] = useState('');
 
   // Estado Modo Manual Especialista
-  const [isManualMode, setIsManualMode] = useState(false);
-  const [manualPitch, setManualPitch] = useState(1.0);
-  const [manualRate, setManualRate] = useState(1.0);
-  const [manualVolume, setManualVolume] = useState(1.0);
+  const [isManualMode, setIsManualMode] = useState(savedSettings.isManualMode || false);
+  const [manualPitch, setManualPitch] = useState(savedSettings.manualPitch ?? 1.0);
+  const [manualRate, setManualRate] = useState(savedSettings.manualRate ?? 1.0);
+  const [manualVolume, setManualVolume] = useState(savedSettings.manualVolume ?? 1.0);
+
+  // ─── ALTA PERSISTÊNCIA ───
+  // Salva dinamicamente qualquer mudança dos controles no aparelho do usuário
+  useEffect(() => {
+    if (!savedSettings.setupDone) return; // Não salvar estados voláteis durante o Wizard
+    settingsStore.save({
+      isDark, selectedEmotion, intensity, isManualMode,
+      manualPitch, manualRate, manualVolume
+    });
+  }, [isDark, selectedEmotion, intensity, isManualMode, manualPitch, manualRate, manualVolume, savedSettings.setupDone]);
 
   // Aplica tema
   useEffect(() => {

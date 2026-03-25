@@ -65,9 +65,15 @@ export function useTTS() {
 
     const utterance = new SpeechSynthesisUtterance(text);
     
+    // Âncora Global p/ Android Chrome GC Bug: manter utterance vivo forçosamente
+    window._ottoUtterance = utterance;
+
     if (voiceObj && voiceObj.originalVoice) {
       utterance.voice = voiceObj.originalVoice;
     }
+    
+    // Evita Mute acidental se engine errar o guess
+    utterance.lang = "pt-BR";
     
     utterance.pitch = pitch;
     utterance.rate = rate;

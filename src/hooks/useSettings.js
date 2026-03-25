@@ -6,6 +6,12 @@ export const DEFAULT_SETTINGS = {
   style: 'casual',
   intensity: 'moderada',
   setupDone: false,
+  isDark: false,
+  selectedEmotion: 'neutro',
+  isManualMode: false,
+  manualPitch: 1.0,
+  manualRate: 1.0,
+  manualVolume: 1.0,
 };
 
 export function useSettings() {
