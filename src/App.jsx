@@ -95,7 +95,9 @@ export default function App() {
     }
     
     const modifiedText = applyTextModifiers(phraseText, finalEmotion, style);
-    speak(modifiedText, selectedVoice.current, p_pitch, p_rate, p_vol);
+    setTimeout(() => {
+      speak(modifiedText, selectedVoice.current, p_pitch, p_rate, p_vol);
+    }, 50);
   };
 
   const INTENSITY_OPTS = [
