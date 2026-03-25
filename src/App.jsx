@@ -6,6 +6,8 @@ import { useSettings } from './hooks/useSettings';
 import SetupScreen from './components/SetupScreen';
 import EmotionWheel from './components/EmotionWheel';
 import PlayerControls from './components/PlayerControls';
+import QuickPhrases from './components/QuickPhrases';
+import Recorder from './components/Recorder';
 import './index.css';
 
 export default function App() {
@@ -59,6 +61,16 @@ export default function App() {
     }
   };
 
+  // Fala imediatamente ao tocar em frase rápida (sem precisar de Play)
+  const handleQuickSpeak = (phraseText) => {
+    if (!phraseText.trim()) return;
+    setText(phraseText);
+    const { style } = savedSettings;
+    const params = getEmotionSettings(selectedEmotion, intensity, style);
+    const modifiedText = applyTextModifiers(phraseText, selectedEmotion, style);
+    speak(modifiedText, selectedVoice.current, params.pitch, params.rate, params.volume);
+  };
+
   const INTENSITY_OPTS = [
     { key: 'suave',    label: 'Suave'    },
     { key: 'moderada', label: 'Moderada' },
@@ -77,18 +89,10 @@ export default function App() {
           <p>Síntese Vocal Emocional</p>
         </div>
         <div className="header-actions">
-          <button
-            className="icon-action-btn"
-            onClick={() => setShowSetup(true)}
-            title="Configurações"
-          >
+          <button className="icon-action-btn" onClick={() => setShowSetup(true)} title="Configurações">
             <Settings size={18} />
           </button>
-          <button
-            className="icon-action-btn"
-            onClick={() => setIsDark(p => !p)}
-            title={isDark ? 'Modo Claro' : 'Modo Escuro'}
-          >
+          <button className="icon-action-btn" onClick={() => setIsDark(p => !p)} title={isDark ? 'Modo Claro' : 'Modo Escuro'}>
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
         </div>
@@ -98,11 +102,7 @@ export default function App() {
         {/* Roleta de Emoções */}
         <section className="glass-panel wheel-section">
           <label>Emoção</label>
-          <EmotionWheel
-            selectedEmotion={selectedEmotion}
-            onSelect={setSelectedEmotion}
-          />
-          {/* Intensidade: 3 pontos */}
+          <EmotionWheel selectedEmotion={selectedEmotion} onSelect={setSelectedEmotion} />
           <div className="intensity-selector">
             {INTENSITY_OPTS.map(opt => (
               <button
@@ -118,13 +118,16 @@ export default function App() {
           </div>
         </section>
 
-        {/* Área de texto */}
+        {/* Frases Rápidas */}
+        <QuickPhrases onSpeak={handleQuickSpeak} />
+
+        {/* Área de texto livre */}
         <section className="text-section glass-panel">
           <textarea
             value={text}
             onChange={e => setText(e.target.value)}
-            placeholder="Toque aqui e digite o que deseja ouvir..."
-            rows={5}
+            placeholder="Ou digite aqui o que deseja ouvir..."
+            rows={4}
           />
         </section>
 
@@ -135,6 +138,9 @@ export default function App() {
           onPlayPause={handlePlayPause}
           onStop={stop}
         />
+
+        {/* Gravador de Voz */}
+        <Recorder />
       </main>
     </div>
   );
