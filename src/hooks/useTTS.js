@@ -16,11 +16,18 @@ export function useTTS() {
     const availableVoices = window.speechSynthesis.getVoices();
     if (availableVoices.length === 0) return;
 
-    // Foca em vozes em Português
-    const ptVoices = availableVoices.filter(v => v.lang.includes('pt'));
+    // Tenta focar em vozes em Português primeiro
+    let targetVoices = availableVoices.filter(v => v.lang.includes('pt'));
+    
+    // FALLBACK CRÍTICO: se não houver vozes PT no dispositivo, aceita qualquer voz
+    // (comum em alguns celulares Android com locales diferentes instalados)
+    if (targetVoices.length === 0) {
+      console.warn('OTTO VOX: Nenhuma voz PT encontrada. Usando fallback para todas as vozes disponíveis.');
+      targetVoices = availableVoices;
+    }
     
     // Processamento de Metadados (Gênero e "Premium")
-    const processedVoices = ptVoices.map(voice => {
+    const processedVoices = targetVoices.map(voice => {
       const nameL = voice.name.toLowerCase();
       
       // Detecção de Qualidade (Premium/Neural soam muito mais naturais)
@@ -43,6 +50,7 @@ export function useTTS() {
     // Ordena: Premium primeiro
     processedVoices.sort((a, b) => (b.isPremium === a.isPremium ? 0 : b.isPremium ? 1 : -1));
     
+    console.log(`OTTO VOX: ${processedVoices.length} vozes carregadas (${targetVoices[0]?.lang || 'unknown'})`);
     setVoices(processedVoices);
   }, []);
 
@@ -70,10 +78,10 @@ export function useTTS() {
 
     if (voiceObj && voiceObj.originalVoice) {
       utterance.voice = voiceObj.originalVoice;
+      // Usa o lang da voz selecionada — não forçar pt-BR pois pode não existir no dispositivo
+      utterance.lang = voiceObj.lang || voiceObj.originalVoice.lang;
     }
-    
-    // Evita Mute acidental se engine errar o guess
-    utterance.lang = "pt-BR";
+    // Se voiceObj for null, deixa o navegador usar a voz default sem lang restrito
     
     utterance.pitch = pitch;
     utterance.rate = rate;
