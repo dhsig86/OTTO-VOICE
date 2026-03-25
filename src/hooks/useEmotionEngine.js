@@ -4,15 +4,16 @@
 // O "desvio" é multiplicado pelo fator de intensidade (suave=0.5, moderada=1, intensa=1.5)
 
 const BASE_EMOTIONS = {
-  neutro:     { label: 'Neutro',    emoji: '😐', pitchDelta:  0,    rateDelta:  0,    volume: 1.0,  color: '#a0b4b2' },
-  alegria:    { label: 'Alegria',   emoji: '😄', pitchDelta:  0.25, rateDelta:  0.1,  volume: 1.0,  color: '#f1c40f' },
-  felicidade: { label: 'Feliz',     emoji: '😊', pitchDelta:  0.3,  rateDelta:  0.12, volume: 1.0,  color: '#2ecc71' },
-  tristeza:   { label: 'Tristeza',  emoji: '😢', pitchDelta: -0.18, rateDelta: -0.15, volume: 0.85, color: '#5dade2' },
-  ansiedade:  { label: 'Ansiedade', emoji: '😰', pitchDelta:  0.1,  rateDelta:  0.35, volume: 0.95, color: '#9b59b6' },
-  duvida:     { label: 'Dúvida',    emoji: '🤔', pitchDelta:  0.2,  rateDelta: -0.08, volume: 1.0,  color: '#e67e22' },
-  irritacao:  { label: 'Irritação', emoji: '😠', pitchDelta: -0.15, rateDelta:  0.18, volume: 1.0,  color: '#e74c3c' },
-  dor:        { label: 'Dor',       emoji: '😣', pitchDelta: -0.22, rateDelta: -0.22, volume: 0.9,  color: '#c0392b' },
-  angustia:   { label: 'Angústia',  emoji: '😩', pitchDelta: -0.12, rateDelta: -0.22, volume: 0.88, color: '#7f8c8d' },
+  //                                          pitch ↕          rate ↕         vol
+  neutro:     { label: 'Neutro',    emoji: '😐', pitchDelta:  0.00, rateDelta:  0.00, volume: 1.00, color: '#a0b4b2' },
+  alegria:    { label: 'Alegria',   emoji: '😄', pitchDelta:  0.45, rateDelta:  0.25, volume: 1.00, color: '#f1c40f' },
+  felicidade: { label: 'Feliz',     emoji: '😊', pitchDelta:  0.35, rateDelta:  0.18, volume: 1.00, color: '#2ecc71' },
+  tristeza:   { label: 'Tristeza',  emoji: '😢', pitchDelta: -0.40, rateDelta: -0.30, volume: 0.80, color: '#5dade2' },
+  ansiedade:  { label: 'Ansiedade', emoji: '😰', pitchDelta:  0.25, rateDelta:  0.50, volume: 0.95, color: '#9b59b6' },
+  duvida:     { label: 'Dúvida',    emoji: '🤔', pitchDelta:  0.20, rateDelta: -0.15, volume: 0.95, color: '#e67e22' },
+  irritacao:  { label: 'Irritação', emoji: '😠', pitchDelta: -0.20, rateDelta:  0.35, volume: 1.00, color: '#e74c3c' },
+  dor:        { label: 'Dor',       emoji: '😣', pitchDelta: -0.45, rateDelta: -0.35, volume: 0.85, color: '#c0392b' },
+  angustia:   { label: 'Angústia',  emoji: '😩', pitchDelta: -0.30, rateDelta: -0.28, volume: 0.82, color: '#7f8c8d' },
 };
 
 const INTENSITY_MULTIPLIER = { suave: 0.5, moderada: 1.0, intensa: 1.5 };

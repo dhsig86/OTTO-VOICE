@@ -126,8 +126,14 @@ export default function App() {
           <p>Síntese Vocal Emocional</p>
         </div>
         <div className="header-actions">
-          <button className="icon-action-btn" onClick={() => setShowSetup(true)} title="Configurações">
-            <Settings size={18} />
+          {/* Chip de voz ativa: clicável para abrir o Wizard rapidamente */}
+          <button
+            className="voice-chip"
+            onClick={() => setShowSetup(true)}
+            title="Configurar voz"
+          >
+            <Settings size={14} />
+            <span>{savedSettings.gender === 'male' ? 'Masculino' : savedSettings.gender === 'all' ? 'Auto' : 'Feminino'}</span>
           </button>
           <button className="icon-action-btn" onClick={() => setIsDark(p => !p)} title={isDark ? 'Modo Claro' : 'Modo Escuro'}>
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
