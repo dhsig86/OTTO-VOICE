@@ -77,8 +77,14 @@ export function useTTS() {
     utterance.onend = () => { setIsPlaying(false); setIsPaused(false); };
     utterance.onpause = () => setIsPaused(true);
     utterance.onresume = () => setIsPaused(false);
-    utterance.onerror = () => { setIsPlaying(false); setIsPaused(false); };
+    utterance.onerror = (e) => { 
+      console.warn("TTS Error:", e);
+      setIsPlaying(false); 
+      setIsPaused(false); 
+    };
 
+    // Hack brutal para Safari/Chrome Mobile: forçar o resume antes do speak destrava a fila travada silenciosamente
+    window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
   };
 

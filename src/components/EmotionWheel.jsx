@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
+import { Dices } from 'lucide-react';
 
 const EMOTION_KEYS = [
   'neutro', 'alegria', 'felicidade', 'tristeza',
   'ansiedade', 'duvida', 'irritacao', 'dor', 'angustia',
 ];
 
-// Padrão CSS para cada emoção (cor e emoji)
 const EMOTION_META = {
   neutro:     { emoji: '😐', color: '#a0b4b2', label: 'Neutro'    },
   alegria:    { emoji: '😄', color: '#f1c40f', label: 'Alegria'   },
@@ -19,97 +19,92 @@ const EMOTION_META = {
 };
 
 const COUNT = EMOTION_KEYS.length;
-const STEP_ANGLE = 360 / COUNT;
 
 export default function EmotionWheel({ selectedEmotion, onSelect }) {
-  const [rotation, setRotation] = useState(0);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const touchStartX = useRef(null);
-  const currentIndex = EMOTION_KEYS.indexOf(selectedEmotion);
+  const trackRef = useRef(null);
+  const itemRefs = useRef({});
 
-  // Sincroniza posição da roleta com emoção selecionada externamente (ex: Setup)
+  // Centraliza o item selecionado ao carregar ou ao mudar via setState
   useEffect(() => {
-    const idx = EMOTION_KEYS.indexOf(selectedEmotion);
-    if (idx >= 0) {
-      setRotation(-idx * STEP_ANGLE);
+    const el = itemRefs.current[selectedEmotion];
+    if (el && trackRef.current) {
+      // scrollIntoView com inline: 'center' faz a mágica acontecer com CSS Scroll Snap
+      el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
   }, [selectedEmotion]);
 
-  const spinTo = (targetIndex, extraSpins = 3) => {
-    if (isSpinning) return;
-    setIsSpinning(true);
-    const fullSpins = extraSpins * 360;
-    const targetAngle = -(targetIndex * STEP_ANGLE);
-    // Calcula quantos graus faltam para chegar ao target partindo do atual
-    const current = rotation % -360;
-    const newRotation = rotation - (rotation % 360) - fullSpins + targetAngle;
-    setRotation(newRotation);
-    setTimeout(() => {
-      setIsSpinning(false);
-      onSelect(EMOTION_KEYS[targetIndex]);
-    }, 900);
+  const handleRandom = () => {
+    // Evita sortear o mesmo com frequência caindo em 'neutro'
+    let nextIdx = Math.floor(Math.random() * COUNT);
+    if (EMOTION_KEYS[nextIdx] === selectedEmotion) {
+      nextIdx = (nextIdx + 1) % COUNT;
+    }
+    onSelect(EMOTION_KEYS[nextIdx]);
   };
 
-  const handleSpin = () => {
-    const randomIdx = Math.floor(Math.random() * COUNT);
-    spinTo(randomIdx);
-  };
+  const handleScrollEnd = () => {
+    if (!trackRef.current) return;
+    
+    // Auto-seleciona a emoção mais próxima do centro ao terminar o scroll manual (Swipe)
+    const track = trackRef.current;
+    const center = track.scrollLeft + track.clientWidth / 2;
+    
+    let closestKey = selectedEmotion;
+    let minDistance = Infinity;
 
-  // Swipe para navegar manualmente
-  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
-  const handleTouchEnd = (e) => {
-    if (touchStartX.current === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX.current;
-    touchStartX.current = null;
-    if (Math.abs(dx) < 30) return; // Ignorar swipes curtos
-    const dir = dx < 0 ? 1 : -1;
-    const nextIdx = (currentIndex + dir + COUNT) % COUNT;
-    spinTo(nextIdx, 0);
-  };
+    EMOTION_KEYS.forEach(key => {
+      const el = itemRefs.current[key];
+      if (!el) return;
+      const elCenter = el.offsetLeft + el.clientWidth / 2;
+      const dist = Math.abs(center - elCenter);
+      if (dist < minDistance) {
+        minDistance = dist;
+        closestKey = key;
+      }
+    });
 
-  const activeEmotion = EMOTION_META[selectedEmotion] || EMOTION_META.neutro;
+    if (closestKey !== selectedEmotion && minDistance < 45) { // Threshold seguro
+      onSelect(closestKey);
+    }
+  };
 
   return (
-    <div className="wheel-container">
-      {/* Seta indicadora no topo */}
-      <div className="wheel-arrow">▼</div>
-
-      {/* Disco giratório */}
-      <div
-        className={`wheel-track${isSpinning ? ' spinning' : ''}`}
-        style={{ transform: `rotate(${rotation}deg)` }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+    <div className="carousel-container">
+      {/* Seta/indicador central de mira */}
+      <div className="carousel-indicator">▼</div>
+      
+      <div 
+        className="carousel-track" 
+        ref={trackRef}
+        onScrollEnd={handleScrollEnd}
+        // Fallback p/ navegadores que não suportam onScrollEnd
+        onMouseUp={handleScrollEnd}
+        onTouchEnd={handleScrollEnd}
       >
-        {EMOTION_KEYS.map((key, i) => {
+        {EMOTION_KEYS.map((key) => {
           const meta = EMOTION_META[key];
           const isActive = key === selectedEmotion;
+          
           return (
             <div
               key={key}
-              className={`wheel-item${isActive ? ' active' : ''}`}
-              style={{
-                '--item-color': meta.color,
-                transform: `translateX(${i * 90}px)`,
-              }}
-              onClick={() => !isSpinning && spinTo(i, 0)}
+              ref={(el) => itemRefs.current[key] = el}
+              className={`carousel-item${isActive ? ' active' : ''}`}
+              style={{ '--item-color': meta.color }}
+              onClick={() => onSelect(key)}
             >
-              <span className="wheel-emoji">{meta.emoji}</span>
-              <span className="wheel-label">{meta.label}</span>
+              <div className="carousel-item-inner">
+                <span className="carousel-emoji">{meta.emoji}</span>
+              </div>
+              <span className="carousel-label">{meta.label}</span>
             </div>
           );
         })}
       </div>
 
-      {/* Botão central de sortear */}
-      <button
-        className={`wheel-spin-btn${isSpinning ? ' spinning' : ''}`}
-        onClick={handleSpin}
-        disabled={isSpinning}
-        title="Girar e sortear emoção"
-      >
-        <span style={{ fontSize: '1.5rem' }}>{activeEmotion.emoji}</span>
-        <span style={{ fontSize: '0.7rem', opacity: 0.8 }}>sortear</span>
+      <button className="carousel-random-btn" onClick={handleRandom} title="Sortear emoção" aria-label="Sortear Emoção Aleatória">
+         <Dices size={18} strokeWidth={2.5} />
+         <span>Sortear</span>
       </button>
     </div>
   );

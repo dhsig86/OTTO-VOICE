@@ -95,9 +95,7 @@ export default function App() {
     }
     
     const modifiedText = applyTextModifiers(phraseText, finalEmotion, style);
-    setTimeout(() => {
-      speak(modifiedText, selectedVoice.current, p_pitch, p_rate, p_vol);
-    }, 50);
+    speak(modifiedText, selectedVoice.current, p_pitch, p_rate, p_vol);
   };
 
   const INTENSITY_OPTS = [
@@ -146,7 +144,7 @@ export default function App() {
           </div>
 
           {!isManualMode ? (
-            <div className="wheel-section-inner">
+            <div className="carousel-section-inner">
               <label>Emoção Mapeada</label>
               <EmotionWheel selectedEmotion={selectedEmotion} onSelect={setSelectedEmotion} />
               <div className="intensity-selector">
