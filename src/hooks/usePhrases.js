@@ -51,7 +51,7 @@ export function usePhrases() {
   const addPhrase = (text) => {
     const current = load();
     const newPhrase = {
-      id: `fav_${Date.now()}`,
+      id: `fav_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       text: text.trim(),
     };
     save([...current, newPhrase]);
