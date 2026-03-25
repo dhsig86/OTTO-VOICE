@@ -8,6 +8,7 @@ import EmotionWheel from './components/EmotionWheel';
 import PlayerControls from './components/PlayerControls';
 import QuickPhrases from './components/QuickPhrases';
 import Recorder from './components/Recorder';
+import ManualControls from './components/ManualControls';
 import './index.css';
 
 export default function App() {
@@ -17,11 +18,19 @@ export default function App() {
 
   // Carrega configurações salvas
   const [savedSettings, setSavedSettings] = useState(() => settingsStore.load());
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false); // Default: Light Mode
   const [showSetup, setShowSetup] = useState(() => !settingsStore.load().setupDone);
+  
+  // Estado Modo Automático / Roleta
   const [selectedEmotion, setSelectedEmotion] = useState('neutro');
   const [intensity, setIntensity] = useState(() => settingsStore.load().intensity || 'moderada');
   const [text, setText] = useState('');
+
+  // Estado Modo Manual Especialista
+  const [isManualMode, setIsManualMode] = useState(false);
+  const [manualPitch, setManualPitch] = useState(1.0);
+  const [manualRate, setManualRate] = useState(1.0);
+  const [manualVolume, setManualVolume] = useState(1.0);
 
   // Aplica tema
   useEffect(() => {
@@ -55,9 +64,18 @@ export default function App() {
     } else {
       if (!text.trim()) return;
       const { style } = savedSettings;
-      const params = getEmotionSettings(selectedEmotion, intensity, style);
-      const modifiedText = applyTextModifiers(text, selectedEmotion, style);
-      speak(modifiedText, selectedVoice.current, params.pitch, params.rate, params.volume);
+      
+      let p_pitch = manualPitch, p_rate = manualRate, p_vol = manualVolume;
+      let finalEmotion = 'neutro';
+
+      if (!isManualMode) {
+        const params = getEmotionSettings(selectedEmotion, intensity, style);
+        p_pitch = params.pitch; p_rate = params.rate; p_vol = params.volume;
+        finalEmotion = selectedEmotion;
+      }
+      
+      const modifiedText = applyTextModifiers(text, finalEmotion, style);
+      speak(modifiedText, selectedVoice.current, p_pitch, p_rate, p_vol);
     }
   };
 
@@ -66,9 +84,18 @@ export default function App() {
     if (!phraseText.trim()) return;
     setText(phraseText);
     const { style } = savedSettings;
-    const params = getEmotionSettings(selectedEmotion, intensity, style);
-    const modifiedText = applyTextModifiers(phraseText, selectedEmotion, style);
-    speak(modifiedText, selectedVoice.current, params.pitch, params.rate, params.volume);
+    
+    let p_pitch = manualPitch, p_rate = manualRate, p_vol = manualVolume;
+    let finalEmotion = 'neutro';
+
+    if (!isManualMode) {
+      const params = getEmotionSettings(selectedEmotion, intensity, style);
+      p_pitch = params.pitch; p_rate = params.rate; p_vol = params.volume;
+      finalEmotion = selectedEmotion;
+    }
+    
+    const modifiedText = applyTextModifiers(phraseText, finalEmotion, style);
+    speak(modifiedText, selectedVoice.current, p_pitch, p_rate, p_vol);
   };
 
   const INTENSITY_OPTS = [
@@ -99,23 +126,50 @@ export default function App() {
       </header>
 
       <main>
-        {/* Roleta de Emoções */}
-        <section className="glass-panel wheel-section">
-          <label>Emoção</label>
-          <EmotionWheel selectedEmotion={selectedEmotion} onSelect={setSelectedEmotion} />
-          <div className="intensity-selector">
-            {INTENSITY_OPTS.map(opt => (
-              <button
-                key={opt.key}
-                className={`intensity-dot${intensity === opt.key ? ' active' : ''}`}
-                onClick={() => setIntensity(opt.key)}
-                title={opt.label}
-              >
-                <span className="intensity-dot-icon" />
-                <span className="intensity-dot-label">{opt.label}</span>
-              </button>
-            ))}
+        {/* Controle Híbrido: Roleta vs Manual */}
+        <section className="glass-panel hybrid-section">
+          <div className="mode-toggle">
+            <button 
+              className={`toggle-btn ${!isManualMode ? 'active' : ''}`}
+              onClick={() => setIsManualMode(false)}
+            >
+              Automático
+            </button>
+            <button 
+              className={`toggle-btn ${isManualMode ? 'active' : ''}`}
+              onClick={() => setIsManualMode(true)}
+            >
+              Manual
+            </button>
           </div>
+
+          {!isManualMode ? (
+            <div className="wheel-section-inner">
+              <label>Emoção Mapeada</label>
+              <EmotionWheel selectedEmotion={selectedEmotion} onSelect={setSelectedEmotion} />
+              <div className="intensity-selector">
+                {INTENSITY_OPTS.map(opt => (
+                  <button
+                    key={opt.key}
+                    className={`intensity-dot${intensity === opt.key ? ' active' : ''}`}
+                    onClick={() => setIntensity(opt.key)}
+                    title={opt.label}
+                  >
+                    <span className="intensity-dot-icon" />
+                    <span className="intensity-dot-label">{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="manual-section-inner">
+               <ManualControls 
+                  pitch={manualPitch} setPitch={setManualPitch}
+                  rate={manualRate} setRate={setManualRate}
+                  volume={manualVolume} setVolume={setManualVolume}
+               />
+            </div>
+          )}
         </section>
 
         {/* Frases Rápidas */}
