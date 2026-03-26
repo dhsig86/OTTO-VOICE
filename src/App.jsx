@@ -34,17 +34,20 @@ export default function App() {
   const [manualRate, setManualRate] = useState(savedSettings.manualRate ?? 1.0);
   const [manualVolume, setManualVolume] = useState(savedSettings.manualVolume ?? 1.0);
 
+  // Motor de voz: pode ser trocado ao vivo na tela principal
+  const [usePremiumVoice, setUsePremiumVoice] = useState(savedSettings.usePremiumVoice ?? false);
+
   // ─── ALTA PERSISTÊNCIA ───
   // Salva dinamicamente qualquer mudança dos controles no aparelho do usuário
   useEffect(() => {
-    if (!savedSettings.setupDone) return; // Não salvar estados voláteis durante o Wizard
+    if (!savedSettings.setupDone) return;
     settingsStore.save({
       isDark, selectedEmotion, intensity, isManualMode,
       manualPitch, manualRate, manualVolume,
-      usePremiumVoice: savedSettings.usePremiumVoice,
+      usePremiumVoice,
       customVoiceId: savedSettings.customVoiceId
     });
-  }, [isDark, selectedEmotion, intensity, isManualMode, manualPitch, manualRate, manualVolume, savedSettings.usePremiumVoice, savedSettings.customVoiceId, savedSettings.setupDone]);
+  }, [isDark, selectedEmotion, intensity, isManualMode, manualPitch, manualRate, manualVolume, usePremiumVoice, savedSettings.customVoiceId, savedSettings.setupDone]);
 
   // Aplica tema
   useEffect(() => {
@@ -71,9 +74,7 @@ export default function App() {
   };
 
   const handlePlayPause = () => {
-    const isPremium = savedSettings.usePremiumVoice;
-    
-    if (isPremium) {
+    if (usePremiumVoice) {
       if (premiumTTS.isPlaying) { premiumTTS.pause(); return; }
       if (premiumTTS.isPaused) { premiumTTS.resume(); return; }
       if (!text.trim()) return;
@@ -105,7 +106,7 @@ export default function App() {
     if (!phraseText.trim()) return;
     setText(phraseText);
     
-    if (savedSettings.usePremiumVoice) {
+    if (usePremiumVoice) {
       premiumTTS.speak(phraseText, savedSettings.customVoiceId);
       return;
     }
@@ -152,12 +153,21 @@ export default function App() {
           <button className="icon-action-btn" onClick={() => setIsDark(p => !p)} title={isDark ? 'Modo Claro' : 'Modo Escuro'}>
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+          {/* Toggle Motor de Voz Inline */}
+          <button
+            className={`voice-engine-toggle ${usePremiumVoice ? 'premium' : 'web'}`}
+            onClick={() => setUsePremiumVoice(p => !p)}
+            title={usePremiumVoice ? 'Voz Premium (ElevenLabs) — clique para usar Web Speech' : 'Web Speech — clique para ativar Voz Premium'}
+          >
+            <span className="vet-icon">{usePremiumVoice ? '🎭' : '📁'}</span>
+            <span className="vet-label">{usePremiumVoice ? 'Premium' : 'Web Speech'}</span>
+          </button>
         </div>
       </header>
 
       <main>
         {/* Banner de Fallback: aparece apenas quando o motor premium falha */}
-        {savedSettings.usePremiumVoice && premiumTTS.fallbackReason && (
+        {usePremiumVoice && premiumTTS.fallbackReason && (
           <div className={`fallback-banner ${premiumTTS.fallbackReason}`}>
             {premiumTTS.fallbackReason === 'offline' && '📶 Sem internet — usando voz local'}
             {premiumTTS.fallbackReason === 'timeout'  && '⏱ Servidor lento — usando voz local'}

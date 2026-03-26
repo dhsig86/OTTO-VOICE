@@ -134,6 +134,34 @@ body {
   box-shadow: 0 0 12px var(--accent-glow);
 }
 
+/* Toggle Motor de Voz (header) */
+.voice-engine-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 20px;
+  border: 1.5px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.voice-engine-toggle.premium {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(92, 198, 186, 0.08);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+.voice-engine-toggle.web:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.vet-icon { font-size: 0.9rem; }
+
 /* Banner de Fallback (aparece discretamente quando ElevenLabs falha) */
 .fallback-banner {
   padding: 0.6rem 1rem;
