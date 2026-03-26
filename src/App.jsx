@@ -3,7 +3,6 @@ import { Settings, Sun, Moon, Cpu, Zap } from 'lucide-react';
 import { useTTS } from './hooks/useTTS';
 import { useEmotionEngine } from './hooks/useEmotionEngine';
 import { useSettings } from './hooks/useSettings';
-import { useNeuralTTS, NEURAL_EMOTION_PARAMS } from './hooks/useNeuralTTS';
 import SetupScreen from './components/SetupScreen';
 import EmotionWheel from './components/EmotionWheel';
 import PlayerControls from './components/PlayerControls';
@@ -32,10 +31,6 @@ export default function App() {
   const [manualPitch, setManualPitch] = useState(savedSettings.manualPitch ?? 1.0);
   const [manualRate, setManualRate] = useState(savedSettings.manualRate ?? 1.0);
   const [manualVolume, setManualVolume] = useState(savedSettings.manualVolume ?? 1.0);
-
-  // Estado Modo Neural TTS
-  const [isNeuralMode, setIsNeuralMode] = useState(false);
-  const neuralTTS = useNeuralTTS();
 
   // ─── ALTA PERSISTÊNCIA ───
   // Salva dinamicamente qualquer mudança dos controles no aparelho do usuário
@@ -72,13 +67,6 @@ export default function App() {
   };
 
   const handlePlayPause = () => {
-    // Modo Neural: redireciona para o motor de IA
-    if (isNeuralMode) {
-      if (neuralTTS.isPlaying) { neuralTTS.stop(); return; }
-      if (!text.trim()) return;
-      neuralTTS.speak(text, isManualMode ? 'neutro' : selectedEmotion);
-      return;
-    }
     if (isPlaying && !isPaused) {
       pause();
     } else if (isPlaying && isPaused) {
@@ -102,10 +90,6 @@ export default function App() {
   const handleQuickSpeak = (phraseText) => {
     if (!phraseText.trim()) return;
     setText(phraseText);
-    if (isNeuralMode) {
-      neuralTTS.speak(phraseText, isManualMode ? 'neutro' : selectedEmotion);
-      return;
-    }
     const { style } = savedSettings;
     let p_pitch = manualPitch, p_rate = manualRate, p_vol = manualVolume;
     let finalEmotion = 'neutro';
@@ -148,49 +132,10 @@ export default function App() {
           <button className="icon-action-btn" onClick={() => setIsDark(p => !p)} title={isDark ? 'Modo Claro' : 'Modo Escuro'}>
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          {/* Toggle Motor de Voz: Web Speech vs Neural */}
-          <button
-            className={`voice-engine-btn ${isNeuralMode ? 'neural' : 'web'}`}
-            onClick={() => {
-              const next = !isNeuralMode;
-              setIsNeuralMode(next);
-              // Pré-carrega o modelo ao ativar pela primeira vez
-              if (next && !neuralTTS.isReady && !neuralTTS.isLoading) {
-                neuralTTS.loadModel();
-              }
-            }}
-            title={isNeuralMode ? 'Voz Neural ativa — clique para Web Speech' : 'Ativar Voz Neural (IA)'}
-          >
-            {isNeuralMode ? <Cpu size={16} /> : <Zap size={16} />}
-          </button>
         </div>
       </header>
 
       <main>
-        {/* Banner de carregamento do modelo Neural */}
-        {isNeuralMode && (neuralTTS.isLoading || !neuralTTS.isReady) && (
-          <div className="neural-banner">
-            {neuralTTS.isLoading ? (
-              <>
-                <Cpu size={16} className="spin-icon" />
-                <span>Baixando Voz Neural... {neuralTTS.loadProgress}%</span>
-                <div className="neural-progress-bar">
-                  <div style={{ width: `${neuralTTS.loadProgress}%` }} />
-                </div>
-              </>
-            ) : (
-              <>
-                <Cpu size={16} />
-                <span>Voz Neural — toque em qualquer botão para ativar</span>
-              </>
-            )}
-          </div>
-        )}
-        {isNeuralMode && neuralTTS.error && (
-          <div className="neural-banner error">
-            <span>⚠ {neuralTTS.error}</span>
-          </div>
-        )}
         {/* Controle Híbrido: Roleta vs Manual */}
         <section className="glass-panel hybrid-section">
           <div className="mode-toggle">
