@@ -156,6 +156,16 @@ export default function App() {
       </header>
 
       <main>
+        {/* Banner de Fallback: aparece apenas quando o motor premium falha */}
+        {savedSettings.usePremiumVoice && premiumTTS.fallbackReason && (
+          <div className={`fallback-banner ${premiumTTS.fallbackReason}`}>
+            {premiumTTS.fallbackReason === 'offline' && '📶 Sem internet — usando voz local'}
+            {premiumTTS.fallbackReason === 'timeout'  && '⏱ Servidor lento — usando voz local'}
+            {premiumTTS.fallbackReason === 'quota'    && '⚠️ Limite de API atingido — usando voz local'}
+            {premiumTTS.fallbackReason === 'auth'     && '🔑 Chave de API inválida — verifique nas configurações da Vercel'}
+            {!['offline','timeout','quota','auth'].includes(premiumTTS.fallbackReason) && '🔄 Usando voz local como fallback'}
+          </div>
+        )}
         {/* Controle Híbrido: Roleta vs Manual */}
         <section className="glass-panel hybrid-section">
           <div className="mode-toggle">

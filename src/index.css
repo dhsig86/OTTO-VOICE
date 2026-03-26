@@ -134,7 +134,32 @@ body {
   box-shadow: 0 0 12px var(--accent-glow);
 }
 
-/* ─── Glass Panel ─── */
+/* Banner de Fallback (aparece discretamente quando ElevenLabs falha) */
+.fallback-banner {
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  background: rgba(255, 200, 80, 0.1);
+  border: 1px solid rgba(255, 200, 80, 0.3);
+  color: #fbbf24;
+  animation: slideDown 0.3s ease-out;
+}
+
+.fallback-banner.auth {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.fallback-banner.offline {
+  background: rgba(156, 163, 175, 0.1);
+  border-color: rgba(156, 163, 175, 0.3);
+  color: var(--text-2);
+}
+
+
 .glass-panel {
   background: var(--panel);
   backdrop-filter: blur(16px);
