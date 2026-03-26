@@ -12,6 +12,8 @@ export const DEFAULT_SETTINGS = {
   manualPitch: 1.0,
   manualRate: 1.0,
   manualVolume: 1.0,
+  usePremiumVoice: false,
+  customVoiceId: '',
 };
 
 export function useSettings() {

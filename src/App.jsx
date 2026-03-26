@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Settings, Sun, Moon, Cpu, Zap } from 'lucide-react';
 import { useTTS } from './hooks/useTTS';
+import { usePremiumTTS } from './hooks/usePremiumTTS';
 import { useEmotionEngine } from './hooks/useEmotionEngine';
 import { useSettings } from './hooks/useSettings';
 import SetupScreen from './components/SetupScreen';
@@ -14,6 +15,7 @@ import './index.css';
 export default function App() {
   const settingsStore = useSettings();
   const { voices, speak, pause, resume, stop, isPlaying, isPaused } = useTTS();
+  const premiumTTS = usePremiumTTS();
   const { getEmotionSettings, applyTextModifiers } = useEmotionEngine();
 
   // Carrega configurações salvas
@@ -38,9 +40,11 @@ export default function App() {
     if (!savedSettings.setupDone) return; // Não salvar estados voláteis durante o Wizard
     settingsStore.save({
       isDark, selectedEmotion, intensity, isManualMode,
-      manualPitch, manualRate, manualVolume
+      manualPitch, manualRate, manualVolume,
+      usePremiumVoice: savedSettings.usePremiumVoice,
+      customVoiceId: savedSettings.customVoiceId
     });
-  }, [isDark, selectedEmotion, intensity, isManualMode, manualPitch, manualRate, manualVolume, savedSettings.setupDone]);
+  }, [isDark, selectedEmotion, intensity, isManualMode, manualPitch, manualRate, manualVolume, savedSettings.usePremiumVoice, savedSettings.customVoiceId, savedSettings.setupDone]);
 
   // Aplica tema
   useEffect(() => {
@@ -67,6 +71,16 @@ export default function App() {
   };
 
   const handlePlayPause = () => {
+    const isPremium = savedSettings.usePremiumVoice;
+    
+    if (isPremium) {
+      if (premiumTTS.isPlaying) { premiumTTS.pause(); return; }
+      if (premiumTTS.isPaused) { premiumTTS.resume(); return; }
+      if (!text.trim()) return;
+      premiumTTS.speak(text, savedSettings.customVoiceId);
+      return;
+    }
+
     if (isPlaying && !isPaused) {
       pause();
     } else if (isPlaying && isPaused) {
@@ -90,6 +104,12 @@ export default function App() {
   const handleQuickSpeak = (phraseText) => {
     if (!phraseText.trim()) return;
     setText(phraseText);
+    
+    if (savedSettings.usePremiumVoice) {
+      premiumTTS.speak(phraseText, savedSettings.customVoiceId);
+      return;
+    }
+
     const { style } = savedSettings;
     let p_pitch = manualPitch, p_rate = manualRate, p_vol = manualVolume;
     let finalEmotion = 'neutro';

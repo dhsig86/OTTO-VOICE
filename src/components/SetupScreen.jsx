@@ -16,6 +16,11 @@ const STEPS = [
     title: 'Como quer que as emoções soem?',
     subtitle: 'Define o quanto cada emoção vai variar a voz.',
   },
+  {
+    id: 'motor',
+    title: 'Voz Ultra-Realista (Premium)',
+    subtitle: 'Ative se você clonou sua voz na ElevenLabs.',
+  }
 ];
 
 export default function SetupScreen({ onComplete }) {
@@ -25,6 +30,8 @@ export default function SetupScreen({ onComplete }) {
     lang: 'pt',
     style: 'casual',
     intensity: 'moderada',
+    usePremiumVoice: false,
+    customVoiceId: '',
   });
 
   const update = (key, value) => setSettings(prev => ({ ...prev, [key]: value }));
@@ -109,6 +116,36 @@ export default function SetupScreen({ onComplete }) {
                   <span className="opt-desc">{opt.desc}</span>
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Passo 4: Motor Premium (ElevenLabs) */}
+          {step === 3 && (
+            <div className="setup-premium">
+              <label className="toggle-label">
+                <input 
+                  type="checkbox" 
+                  checked={settings.usePremiumVoice} 
+                  onChange={e => update('usePremiumVoice', e.target.checked)} 
+                />
+                <span className="toggle-text">
+                  <strong>Ativar Voz Premium (ElevenLabs)</strong>
+                  Ative apenas se você colou sua API Key segura no backend da Vercel. Uso de internet obrigatório.
+                </span>
+              </label>
+
+              {settings.usePremiumVoice && (
+                <div className="custom-voice-id-wrap">
+                  <label>ID da Voz (Seu Clone ou Voz Exclusiva)</label>
+                  <input
+                    type="text"
+                    value={settings.customVoiceId}
+                    onChange={e => update('customVoiceId', e.target.value)}
+                    placeholder="Ex: 21m00Tcm4TlvDq8ikWAM"
+                  />
+                  <p className="voice-tip">Se vazio, usará a voz Rachel (Exemplo Hi-Fi Padrão).</p>
+                </div>
+              )}
             </div>
           )}
         </div>
