@@ -611,6 +611,22 @@ textarea::placeholder { color: var(--text-2); }
 /* ─── Responsive: Mobile (≤ 480px) ─── */
 @media (max-width: 480px) {
   body { padding: 1rem 0.75rem 2rem; }
+  
+  /* Ajuste crucial do Header para caber o novo botão */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .voice-chip, .voice-engine-toggle {
+    flex: 1;
+    justify-content: center;
+  }
+
   .header h1 { font-size: 1.6rem; }
   .header p { font-size: 0.8rem; }
   .glass-panel { padding: 1.1rem; border-radius: 12px; }
@@ -624,6 +640,12 @@ textarea::placeholder { color: var(--text-2); }
 /* ─── Responsive: Mobile pequeno (≤ 320px) ─── */
 @media (max-width: 320px) {
   .header h1 { font-size: 1.4rem; }
+  .header-actions { gap: 0.35rem; }
+  .voice-chip, .voice-engine-toggle {
+    font-size: 0.7rem;
+    padding: 0.4rem 0.5rem;
+  }
+  .icon-action-btn { width: 34px; height: 34px; }
   .wheel-item { min-width: 70px; }
   .intensity-selector { gap: 1rem; }
   textarea { font-size: 0.95rem; }
