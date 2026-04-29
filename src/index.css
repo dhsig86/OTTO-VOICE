@@ -610,8 +610,16 @@ textarea::placeholder { color: var(--text-2); }
 
 /* ─── Responsive: Mobile (≤ 480px) ─── */
 @media (max-width: 480px) {
-  body { padding: 1rem 0.75rem 2rem; }
-  
+  body {
+    padding: 1rem 0.75rem 2rem;
+    overflow-x: hidden; /* evita scroll horizontal no modo emoções */
+  }
+
+  .app-container {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   /* Ajuste crucial do Header para caber o novo botão */
   .header {
     flex-direction: column;
@@ -628,13 +636,29 @@ textarea::placeholder { color: var(--text-2); }
   }
 
   .header h1 { font-size: 1.6rem; }
-  .header p { font-size: 0.8rem; }
+  .header p  { font-size: 0.8rem; }
   .glass-panel { padding: 1.1rem; border-radius: 12px; }
-  .wheel-item { min-width: 80px; }
-  .wheel-emoji { font-size: 1.4rem; }
+
+  /* Carousel no modo emoções — itens menores p/ caber na tela */
+  .carousel-item  { flex: 0 0 68px; }           /* era herdado de 80px */
+  .carousel-item-inner { width: 48px; height: 48px; }
+  .carousel-emoji { font-size: 1.5rem; }
+  .carousel-label { font-size: 0.65rem; }
+  /* Padding lateral proporcional ao viewport, não fixo em 50% */
+  .carousel-track { padding: 1rem calc(50% - 34px); }
+
+  /* Garante que o painel do modo emoções não exceda a tela */
+  .carousel-section-inner,
+  .manual-section-inner { width: 100%; overflow-x: hidden; }
+
+  /* Modo manual — sliders confortáveis */
   textarea { min-height: 110px; font-size: 1rem; padding: 1rem; }
   .play-btn { width: 64px; height: 64px; }
   .stop-wrapper { width: 46px; height: 46px; }
+
+  /* Intensity dots — mais espaçados p/ toque */
+  .intensity-selector { gap: 1.25rem; }
+  .intensity-dot-icon { width: 12px; height: 12px; }
 }
 
 /* ─── Responsive: Mobile pequeno (≤ 320px) ─── */
@@ -646,7 +670,8 @@ textarea::placeholder { color: var(--text-2); }
     padding: 0.4rem 0.5rem;
   }
   .icon-action-btn { width: 34px; height: 34px; }
-  .wheel-item { min-width: 70px; }
+  .carousel-item  { flex: 0 0 60px; }
+  .carousel-track { padding: 1rem calc(50% - 30px); }
   .intensity-selector { gap: 1rem; }
   textarea { font-size: 0.95rem; }
 }
