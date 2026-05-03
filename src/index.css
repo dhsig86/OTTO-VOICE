@@ -644,12 +644,14 @@ textarea::placeholder { color: var(--text-2); }
   .carousel-item-inner { width: 48px; height: 48px; }
   .carousel-emoji { font-size: 1.5rem; }
   .carousel-label { font-size: 0.65rem; }
-  /* Padding lateral proporcional ao viewport, não fixo em 50% */
-  .carousel-track { padding: 1rem calc(50% - 34px); }
+  /* Centering via margin nos extremos: evita padding-50% + overflow-x:hidden */
+  .carousel-track { padding-block: 1rem; padding-inline: 0; }
+  .carousel-item:first-child { margin-left: calc(50% - 34px); }
+  .carousel-item:last-child  { margin-right: calc(50% - 34px); }
 
   /* Garante que o painel do modo emoções não exceda a tela */
   .carousel-section-inner,
-  .manual-section-inner { width: 100%; overflow-x: hidden; }
+  .manual-section-inner { width: 100%; }
 
   /* Modo manual — sliders confortáveis */
   textarea { min-height: 110px; font-size: 1rem; padding: 1rem; }
@@ -671,7 +673,8 @@ textarea::placeholder { color: var(--text-2); }
   }
   .icon-action-btn { width: 34px; height: 34px; }
   .carousel-item  { flex: 0 0 60px; }
-  .carousel-track { padding: 1rem calc(50% - 30px); }
+  .carousel-item:first-child { margin-left: calc(50% - 30px); }
+  .carousel-item:last-child  { margin-right: calc(50% - 30px); }
   .intensity-selector { gap: 1rem; }
   textarea { font-size: 0.95rem; }
 }

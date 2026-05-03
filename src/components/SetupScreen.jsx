@@ -36,6 +36,14 @@ export default function SetupScreen({ onComplete }) {
 
   const update = (key, value) => setSettings(prev => ({ ...prev, [key]: value }));
 
+  const GENDER_VOICE = {
+    female: '21m00Tcm4TlvDq8ikWAM', // Rachel
+    male:   'pNInz6obpgDQGcFmaJgB',  // Adam
+    all:    '',
+  };
+  const selectGender = (gender) =>
+    setSettings(prev => ({ ...prev, gender, customVoiceId: GENDER_VOICE[gender] ?? prev.customVoiceId }));
+
   const next = () => {
     if (step < STEPS.length - 1) setStep(s => s + 1);
     else onComplete(settings);
@@ -68,7 +76,7 @@ export default function SetupScreen({ onComplete }) {
                 <button
                   key={opt.value}
                   className={`setup-option-btn${settings.gender === opt.value ? ' selected' : ''}`}
-                  onClick={() => update('gender', opt.value)}
+                  onClick={() => selectGender(opt.value)}
                 >
                   <span className="opt-icon">{opt.icon}</span>
                   <span className="opt-label">{opt.label}</span>
@@ -143,7 +151,7 @@ export default function SetupScreen({ onComplete }) {
                     onChange={e => update('customVoiceId', e.target.value)}
                     placeholder="Ex: 21m00Tcm4TlvDq8ikWAM"
                   />
-                  <p className="voice-tip">Se vazio, usará a voz Rachel (Exemplo Hi-Fi Padrão).</p>
+                  <p className="voice-tip">Pré-preenchido conforme o gênero selecionado. Cole seu ID customizado para substituir.</p>
                 </div>
               )}
             </div>
