@@ -218,6 +218,7 @@ label {
   align-items: center;
   gap: 0.5rem;
   width: 100%;
+  overflow: hidden; /* impede vazamento horizontal em qualquer viewport */
 }
 
 .carousel-indicator {
@@ -612,7 +613,7 @@ textarea::placeholder { color: var(--text-2); }
 @media (max-width: 480px) {
   body {
     padding: 1rem 0.75rem 2rem;
-    overflow-x: hidden; /* evita scroll horizontal no modo emoções */
+    overflow-x: hidden;
   }
 
   .app-container {
@@ -620,45 +621,70 @@ textarea::placeholder { color: var(--text-2); }
     overflow-x: hidden;
   }
 
-  /* Ajuste crucial do Header para caber o novo botão */
+  /* Header empilhado verticalmente */
   .header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 0.75rem;
   }
   .header-actions {
     width: 100%;
     justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
   }
-  .voice-chip, .voice-engine-toggle {
+  /* Botões de texto crescem igualmente; texto truncado se necessário */
+  .voice-chip,
+  .voice-engine-toggle {
     flex: 1;
     justify-content: center;
+    overflow: hidden;
+    min-width: 0;
   }
+  .voice-chip span,
+  .vet-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Botão de ícone não cresce */
+  .icon-action-btn { flex: 0 0 38px; }
 
   .header h1 { font-size: 1.6rem; }
   .header p  { font-size: 0.8rem; }
   .glass-panel { padding: 1.1rem; border-radius: 12px; }
 
-  /* Carousel no modo emoções — itens menores p/ caber na tela */
-  .carousel-item  { flex: 0 0 68px; }           /* era herdado de 80px */
-  .carousel-item-inner { width: 48px; height: 48px; }
-  .carousel-emoji { font-size: 1.5rem; }
-  .carousel-label { font-size: 0.65rem; }
-  /* Centering via margin nos extremos: evita padding-50% + overflow-x:hidden */
-  .carousel-track { padding-block: 1rem; padding-inline: 0; }
+  /* Painel híbrido: clip para não vazar */
+  .hybrid-section { overflow: hidden; }
+
+  /* Carousel: container não vaza, track scroll interno */
+  .carousel-container { overflow: hidden; width: 100%; }
+  .carousel-track {
+    padding-block: 1rem;
+    padding-inline: 0;
+    overflow-x: auto;
+    /* Scroll interno sem vazar pro pai */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Itens menores p/ caber na tela */
+  .carousel-item        { flex: 0 0 68px; }
+  .carousel-item-inner  { width: 48px; height: 48px; }
+  .carousel-emoji       { font-size: 1.5rem; }
+  .carousel-label       { font-size: 0.65rem; }
+
+  /* Centering: margin nos extremos, sem padding 50% */
   .carousel-item:first-child { margin-left: calc(50% - 34px); }
   .carousel-item:last-child  { margin-right: calc(50% - 34px); }
 
-  /* Garante que o painel do modo emoções não exceda a tela */
+  /* Garante contenção */
   .carousel-section-inner,
-  .manual-section-inner { width: 100%; }
+  .manual-section-inner { width: 100%; overflow: hidden; }
 
-  /* Modo manual — sliders confortáveis */
   textarea { min-height: 110px; font-size: 1rem; padding: 1rem; }
   .play-btn { width: 64px; height: 64px; }
   .stop-wrapper { width: 46px; height: 46px; }
 
-  /* Intensity dots — mais espaçados p/ toque */
   .intensity-selector { gap: 1.25rem; }
   .intensity-dot-icon { width: 12px; height: 12px; }
 }
