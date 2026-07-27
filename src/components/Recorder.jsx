@@ -1,4 +1,4 @@
-import { Mic, MicOff, Download, Trash2, Play } from 'lucide-react';
+import { Mic, MicOff, Download, Trash2 } from 'lucide-react';
 import { useRecorder } from '../hooks/useRecorder';
 
 export default function Recorder() {

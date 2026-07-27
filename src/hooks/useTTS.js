@@ -63,7 +63,7 @@ export function useTTS() {
 
   const speak = (text, voiceObj, pitch = 1, rate = 1, volume = 1) => {
     if (!window.speechSynthesis) {
-      alert("Seu navegador não suporta síntese de voz.");
+      console.error("OTTO VOX: Navegador não suporta síntese de voz (Web Speech API indisponível).");
       return;
     }
 

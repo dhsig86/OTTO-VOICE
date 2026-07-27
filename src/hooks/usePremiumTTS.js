@@ -1,5 +1,36 @@
 import { useState, useRef, useCallback } from 'react';
 
+// ── Obtém token Firebase do PWA Shell ou do próprio módulo ──────────────────
+// O OTTO VOX pode rodar:
+//   (a) embarcado como iframe no PWA Shell → recebe token via postMessage
+//   (b) standalone → se futuro login direto for implementado
+// Se nenhum token disponível, faz fallback para Web Speech (gratuito/offline).
+let _cachedFirebaseToken = null;
+
+// Listener para receber token do PWA Shell via postMessage
+if (typeof window !== 'undefined') {
+  window.addEventListener('message', (event) => {
+    const ALLOWED_ORIGINS = [
+      'https://otto.drdariohart.com',
+      'https://ottos-plum.vercel.app',
+      'https://ottopwa.vercel.app',
+      'http://localhost:5173',
+    ];
+    if (!ALLOWED_ORIGINS.includes(event.origin)) return;
+    if (event.data?.type === 'otto-context' && event.data?.payload?.firebaseToken) {
+      _cachedFirebaseToken = event.data.payload.firebaseToken;
+      console.log('OTTO VOX: Token Firebase recebido do PWA Shell.');
+    }
+  });
+}
+
+/**
+ * Define o token Firebase externamente (para uso standalone ou integração direta).
+ */
+export function setFirebaseToken(token) {
+  _cachedFirebaseToken = token;
+}
+
 // Motores de fallback: Web Speech API nativo
 function speakWithWebSpeech(text, onEnd) {
   if (!window.speechSynthesis) return;
@@ -13,6 +44,9 @@ function speakWithWebSpeech(text, onEnd) {
   window.speechSynthesis.resume(); // Anti-Hang Mobile
   window.speechSynthesis.speak(utterance);
 }
+
+// URL do serverless — absoluta para funcionar em qualquer deploy
+const TTS_API_URL = import.meta.env.VITE_TTS_API_URL || '/api/tts';
 
 export function usePremiumTTS() {
   const [isPlaying, setIsPlaying]   = useState(false);
@@ -51,12 +85,22 @@ export function usePremiumTTS() {
       return;
     }
 
+    // ─── Verificação de Token Firebase ────────────────────────────────────
+    if (!_cachedFirebaseToken) {
+      console.warn('OTTO VOX: Sem token Firebase. Usando Web Speech como fallback.');
+      _speakFallback(text, 'no_auth');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/tts', {
+      const response = await fetch(TTS_API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${_cachedFirebaseToken}`,
+        },
         body: JSON.stringify({ text, voiceId }),
         // Timeout de 8s: se o servidor demorar, o paciente não pode esperar
         signal: AbortSignal.timeout(8000),
@@ -66,11 +110,12 @@ export function usePremiumTTS() {
         let reason = 'api_error';
         try {
           const errData = await response.json();
-          // Detecta erros específicos de quota da ElevenLabs
           if (response.status === 429 || (errData.error || '').toLowerCase().includes('quota')) {
             reason = 'quota';
           } else if (response.status === 401) {
             reason = 'auth';
+            // Token expirou — limpar cache para forçar renovação
+            _cachedFirebaseToken = null;
           }
         } catch (_) { /* ignora parse error */ }
         throw Object.assign(new Error('API Error'), { reason });

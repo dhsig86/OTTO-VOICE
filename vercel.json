@@ -1,0 +1,17 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "ALLOW-FROM https://otto.drdariohart.com"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self' https://otto.drdariohart.com https://ottos-plum.vercel.app https://ottopwa.vercel.app"
+        }
+      ]
+    }
+  ]
+}

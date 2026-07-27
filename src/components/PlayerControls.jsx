@@ -4,7 +4,6 @@ import { Play, Pause, Square } from 'lucide-react';
 const HOLD_DURATION = 2000; // 2 segundos para Stop
 
 export default function PlayerControls({ isPlaying, isPaused, onPlayPause, onStop }) {
-  const holdTimerRef = useRef(null);
   const [holdProgress, setHoldProgress] = useState(0); // 0 → 1
   const animFrameRef = useRef(null);
 

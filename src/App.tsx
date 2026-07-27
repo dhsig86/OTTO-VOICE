@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Settings, Sun, Moon, Cpu, Zap } from 'lucide-react';
+import { Settings, Sun, Moon } from 'lucide-react';
 import { useTTS } from './hooks/useTTS';
 import { usePremiumTTS } from './hooks/usePremiumTTS';
 import { useEmotionEngine } from './hooks/useEmotionEngine';
@@ -10,6 +10,7 @@ import PlayerControls from './components/PlayerControls';
 import QuickPhrases from './components/QuickPhrases';
 import Recorder from './components/Recorder';
 import ManualControls from './components/ManualControls';
+import EmergencyButton from './components/EmergencyButton';
 import './index.css';
 
 export default function App() {
@@ -47,7 +48,7 @@ export default function App() {
       usePremiumVoice,
       customVoiceId: savedSettings.customVoiceId
     });
-  }, [isDark, selectedEmotion, intensity, isManualMode, manualPitch, manualRate, manualVolume, usePremiumVoice, savedSettings.customVoiceId, savedSettings.setupDone]);
+  }, [isDark, selectedEmotion, intensity, isManualMode, manualPitch, manualRate, manualVolume, usePremiumVoice, savedSettings.customVoiceId, savedSettings.setupDone, settingsStore]);
 
   // Aplica tema
   useEffect(() => {
@@ -55,17 +56,17 @@ export default function App() {
   }, [isDark]);
 
   // Seleciona voz automática baseada no setup salvo
-  const selectedVoice = useRef(null);
+  const selectedVoice = useRef<any>(null);
   useEffect(() => {
     if (voices.length === 0) return;
     const { gender } = savedSettings;
     const filtered = gender === 'all'
       ? voices
-      : voices.filter(v => v.gender === gender);
+      : voices.filter((v: any) => v.gender === gender);
     selectedVoice.current = filtered[0] || voices[0];
   }, [voices, savedSettings]);
 
-  const handleSetupComplete = (newSettings) => {
+  const handleSetupComplete = (newSettings: any) => {
     const full = { ...newSettings, setupDone: true };
     settingsStore.save(full);
     setSavedSettings(full);
@@ -102,7 +103,7 @@ export default function App() {
   };
 
   // Fala imediatamente ao tocar em frase rápida
-  const handleQuickSpeak = (phraseText) => {
+  const handleQuickSpeak = (phraseText: string) => {
     if (!phraseText.trim()) return;
     setText(phraseText);
     
@@ -141,7 +142,7 @@ export default function App() {
           <p>Síntese Vocal Emocional</p>
         </div>
         <div className="header-actions">
-          {/* Chip de voz ativa: clicável para abrir o Wizard rapidamente */}
+          {/* Chip de voz activa: clicável para abrir o Wizard rapidamente */}
           <button
             className="voice-chip"
             onClick={() => setShowSetup(true)}
@@ -172,8 +173,9 @@ export default function App() {
             {premiumTTS.fallbackReason === 'offline' && '📶 Sem internet — usando voz local'}
             {premiumTTS.fallbackReason === 'timeout'  && '⏱ Servidor lento — usando voz local'}
             {premiumTTS.fallbackReason === 'quota'    && '⚠️ Limite de API atingido — usando voz local'}
-            {premiumTTS.fallbackReason === 'auth'     && '🔑 Chave de API inválida — verifique nas configurações da Vercel'}
-            {!['offline','timeout','quota','auth'].includes(premiumTTS.fallbackReason) && '🔄 Usando voz local como fallback'}
+            {premiumTTS.fallbackReason === 'auth'     && '🔑 Token expirado — faça login novamente no OTTO'}
+            {premiumTTS.fallbackReason === 'no_auth'  && '🔒 Login necessário para voz Premium — usando voz local'}
+            {!['offline','timeout','quota','auth','no_auth'].includes(premiumTTS.fallbackReason) && '🔄 Usando voz local como fallback'}
           </div>
         )}
         {/* Controle Híbrido: Roleta vs Manual */}
@@ -222,6 +224,9 @@ export default function App() {
           )}
         </section>
 
+        {/* Botão de Emergência Fixo */}
+        <EmergencyButton onTriggerEmergency={handleQuickSpeak} />
+
         {/* Frases Rápidas */}
         <QuickPhrases onSpeak={handleQuickSpeak} />
 
@@ -232,6 +237,7 @@ export default function App() {
             onChange={e => setText(e.target.value)}
             placeholder="Ou digite aqui o que deseja ouvir..."
             rows={4}
+            aria-label="Texto para síntese vocal"
           />
         </section>
 

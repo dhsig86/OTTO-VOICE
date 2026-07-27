@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/',
+  // @ts-ignore - vitest options are injected into vite config
   test: {
     environment: 'jsdom',
     globals: true,

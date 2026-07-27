@@ -28,13 +28,57 @@ export default function EmotionWheel({ selectedEmotion, onSelect }) {
   useEffect(() => {
     const el = itemRefs.current[selectedEmotion];
     if (el && trackRef.current) {
-      // scrollIntoView com inline: 'center' faz a mágica acontecer com CSS Scroll Snap
       el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
   }, [selectedEmotion]);
 
+  // ─── scrollend nativo (substitui onScrollEnd que não é evento React) ─────
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const handleScrollEnd = () => {
+      const center = track.scrollLeft + track.clientWidth / 2;
+      let closestKey = selectedEmotion;
+      let minDistance = Infinity;
+
+      EMOTION_KEYS.forEach(key => {
+        const el = itemRefs.current[key];
+        if (!el) return;
+        const elCenter = el.offsetLeft + el.clientWidth / 2;
+        const dist = Math.abs(center - elCenter);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestKey = key;
+        }
+      });
+
+      if (closestKey !== selectedEmotion && minDistance < 45) {
+        onSelect(closestKey);
+      }
+    };
+
+    // scrollend suportado em Chrome 114+, Firefox 109+, Safari 18+
+    track.addEventListener('scrollend', handleScrollEnd);
+
+    // Fallback: touchend + debounce para navegadores sem scrollend
+    let touchTimer = null;
+    const handleTouchEnd = () => {
+      clearTimeout(touchTimer);
+      touchTimer = setTimeout(handleScrollEnd, 150);
+    };
+    track.addEventListener('touchend', handleTouchEnd);
+    track.addEventListener('mouseup', handleTouchEnd);
+
+    return () => {
+      track.removeEventListener('scrollend', handleScrollEnd);
+      track.removeEventListener('touchend', handleTouchEnd);
+      track.removeEventListener('mouseup', handleTouchEnd);
+      clearTimeout(touchTimer);
+    };
+  }, [selectedEmotion, onSelect]);
+
   const handleRandom = () => {
-    // Evita sortear o mesmo com frequência caindo em 'neutro'
     let nextIdx = Math.floor(Math.random() * COUNT);
     if (EMOTION_KEYS[nextIdx] === selectedEmotion) {
       nextIdx = (nextIdx + 1) % COUNT;
@@ -42,44 +86,14 @@ export default function EmotionWheel({ selectedEmotion, onSelect }) {
     onSelect(EMOTION_KEYS[nextIdx]);
   };
 
-  const handleScrollEnd = () => {
-    if (!trackRef.current) return;
-    
-    // Auto-seleciona a emoção mais próxima do centro ao terminar o scroll manual (Swipe)
-    const track = trackRef.current;
-    const center = track.scrollLeft + track.clientWidth / 2;
-    
-    let closestKey = selectedEmotion;
-    let minDistance = Infinity;
-
-    EMOTION_KEYS.forEach(key => {
-      const el = itemRefs.current[key];
-      if (!el) return;
-      const elCenter = el.offsetLeft + el.clientWidth / 2;
-      const dist = Math.abs(center - elCenter);
-      if (dist < minDistance) {
-        minDistance = dist;
-        closestKey = key;
-      }
-    });
-
-    if (closestKey !== selectedEmotion && minDistance < 45) { // Threshold seguro
-      onSelect(closestKey);
-    }
-  };
-
   return (
-    <div className="carousel-container">
+    <div className="carousel-container" role="radiogroup" aria-label="Seleção de emoção">
       {/* Seta/indicador central de mira */}
       <div className="carousel-indicator">▼</div>
       
       <div 
         className="carousel-track" 
         ref={trackRef}
-        onScrollEnd={handleScrollEnd}
-        // Fallback p/ navegadores que não suportam onScrollEnd
-        onMouseUp={handleScrollEnd}
-        onTouchEnd={handleScrollEnd}
       >
         {EMOTION_KEYS.map((key) => {
           const meta = EMOTION_META[key];
@@ -92,6 +106,11 @@ export default function EmotionWheel({ selectedEmotion, onSelect }) {
               className={`carousel-item${isActive ? ' active' : ''}`}
               style={{ '--item-color': meta.color }}
               onClick={() => onSelect(key)}
+              role="radio"
+              aria-checked={isActive}
+              aria-label={`Emoção: ${meta.label}`}
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(key); }}
             >
               <div className="carousel-item-inner">
                 <span className="carousel-emoji">{meta.emoji}</span>
