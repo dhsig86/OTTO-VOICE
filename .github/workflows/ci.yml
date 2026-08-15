@@ -1,0 +1,45 @@
+# CI — OTTO VOICE / VOX (frontend React+JSX + Vitest; TTS emocional)
+# ============================================================================
+# So roda TESTES + BUILD num push/PR. NAO deploya, NAO muda codigo, NAO toca produção.
+# O deploy real continua sendo a Vercel. Este CI e apenas o gate de teste
+# (anti-regressao). Pior caso possivel = um check vermelho no GitHub.
+#
+# Instalado 12/08/2026 pelo Chefe de Ferramentas a partir de
+# _TOOLS/otto-ci/template-node-frontend.yml, validado localmente antes:
+#   - Vitest: 4 arquivos, 58 testes -> VERDE
+#   - Build (vite build)            -> VERDE
+#
+# Ajustes ao layout real do modulo:
+#   - O repo git E a pasta OTTO VOICE (frontend na raiz) -> sem working-directory.
+#   - Modulo e React+JSX SEM TypeScript -> SEM passo de typecheck (nao ha tsc).
+#   - Sem passo de lint (nao ha script de lint no package.json).
+#   - Script de teste e "npm test" (= vitest run), nao "test:run".
+# ============================================================================
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Testes (Vitest — anti-regressao, bloqueante)
+        run: npm test
+
+      - name: Build (vite build — bloqueante)
+        run: npm run build
