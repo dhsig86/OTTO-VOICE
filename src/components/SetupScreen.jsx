@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useHistoryView } from '../hooks/useHistoryView';
 
 const STEPS = [
   {
@@ -24,7 +25,8 @@ const STEPS = [
 ];
 
 export default function SetupScreen({ onComplete }) {
-  const [step, setStep] = useState(0);
+  // Passo da configuração no histórico: voltar do Android/gesto/OTTO PWA = "Voltar" do passo.
+  const [step, setStep] = useHistoryView('ottoVoiceSetupStep', 0);
   const [settings, setSettings] = useState({
     gender: 'female',
     lang: 'pt',
@@ -45,11 +47,16 @@ export default function SetupScreen({ onComplete }) {
     setSettings(prev => ({ ...prev, gender, customVoiceId: GENDER_VOICE[gender] ?? prev.customVoiceId }));
 
   const next = () => {
-    if (step < STEPS.length - 1) setStep(s => s + 1);
-    else onComplete(settings);
+    if (step < STEPS.length - 1) setStep(step + 1);
+    else {
+      // Fim da configuração: tira do histórico as entradas dos passos (senão o próximo "voltar"
+      // desempilharia passos que já sumiram da tela — "voltar morto").
+      if (step > 0) window.history.go(-step);
+      onComplete(settings);
+    }
   };
 
-  const back = () => setStep(s => s - 1);
+  const back = () => setStep(step - 1);
 
   return (
     <div className="setup-overlay">
