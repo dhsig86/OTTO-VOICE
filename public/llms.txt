@@ -1,0 +1,10 @@
+# OTTO VOX
+
+> Dê voz a quem perdeu a fala. Motor gratuito de síntese vocal emocional para pacientes laringectomizados e com comprometimento vocal ORL.
+
+Público: Pessoas laringectomizadas ou com comprometimento vocal. Idioma: português do Brasil. Tecnologia de apoio à comunicação.
+
+## Links
+
+- [OTTO VOX](https://otto-voice-one.vercel.app/): abrir o módulo
+- [Ecossistema OTTO](https://ottopwa.vercel.app/llms.txt): todos os módulos do OTTO

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://otto-voice-one.vercel.app/sitemap.xml
